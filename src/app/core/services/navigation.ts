@@ -27,6 +27,7 @@ export class NavigationService {
   private readonly strideMeters = 0.75;
   private readonly logicalUnitsPerMeter = 20;
   private readonly qrCalibRadiusLogical = 30;
+  private activeQrInRange: string | null = null;
 
   setZone(zoneId: string): void {
     this.storeMapService.zones$.pipe(take(1)).subscribe((zones) => {
@@ -40,6 +41,7 @@ export class NavigationService {
       this.trail$.next([selectedZone.anchorPos]);
       this.driftError$.next(0);
       this.routeWaypoints$.next([]);
+      this.activeQrInRange = selectedZone.id;
     });
   }
 
@@ -93,15 +95,24 @@ export class NavigationService {
     this.currentZone$.next(null);
     this.trail$.next([]);
     this.routeWaypoints$.next([]);
+    this.activeQrInRange = null;
   }
 
   private autoCalibrateWithQr(position: Position): void {
     this.storeMapService.qrPoints$.pipe(take(1)).subscribe((points) => {
       const closePoint = points.find((point) => this.distance(position, point.pos) <= this.qrCalibRadiusLogical);
-      if (closePoint) {
-        this.calibrate(closePoint.pos);
-        this.syncZoneFromQr(closePoint);
+      if (!closePoint) {
+        this.activeQrInRange = null;
+        return;
       }
+
+      if (closePoint.zoneId === this.activeQrInRange) {
+        return;
+      }
+
+      this.activeQrInRange = closePoint.zoneId;
+      this.calibrate(closePoint.pos);
+      this.syncZoneFromQr(closePoint);
     });
   }
 
