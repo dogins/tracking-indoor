@@ -1,6 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -38,6 +39,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly pedometerService = inject(PedometerService);
 
   @ViewChild('mapCanvas') private readonly canvasRef!: ElementRef<HTMLCanvasElement>;
@@ -105,6 +107,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.instructionDistance = instruction.distanceM;
 
         this.drawMap();
+        this.cdr.markForCheck();
       });
   }
 
@@ -137,10 +140,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (granted) {
       this.pedometerService.startListening();
       this.sensorMessage = 'Sensores activos: brújula y podómetro habilitados.';
+      this.cdr.markForCheck();
       return;
     }
 
     this.sensorMessage = 'No se pudo activar sensores. Revisa permisos del navegador.';
+    this.cdr.markForCheck();
   }
 
   toggleSimulation(): void {

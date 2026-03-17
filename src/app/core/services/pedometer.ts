@@ -19,9 +19,17 @@ export class PedometerService {
   // Uses linear acceleration (no gravity). Peaks > threshold = one step.
   private readonly motionHandler = (event: DeviceMotionEvent) => {
     const a = event.acceleration;
-    if (!a) return;
 
-    const magnitude = Math.sqrt((a.x ?? 0) ** 2 + (a.y ?? 0) ** 2 + (a.z ?? 0) ** 2);
+    let magnitude = 0;
+    if (a) {
+      magnitude = Math.sqrt((a.x ?? 0) ** 2 + (a.y ?? 0) ** 2 + (a.z ?? 0) ** 2);
+    } else {
+      const g = event.accelerationIncludingGravity;
+      if (!g) return;
+      const gravityMagnitude = Math.sqrt((g.x ?? 0) ** 2 + (g.y ?? 0) ** 2 + (g.z ?? 0) ** 2);
+      magnitude = Math.abs(gravityMagnitude - 9.81);
+    }
+
     const now = Date.now();
 
     if (magnitude > STEP_THRESHOLD && now - this.lastStepAt > STEP_COOLDOWN_MS) {
