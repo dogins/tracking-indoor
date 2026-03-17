@@ -9,24 +9,39 @@ export class PedometerService {
 
   private listening = false;
   private lastStepAt = 0;
-  private readonly threshold = 2.5;
-  private readonly cooldownMs = 350;
+  private readonly cooldownMs = 300;
+  private readonly zAtRest = 9.81;
+  private readonly zPeakThreshold = 0.8;
+  private readonly smoothingFactor = 0.7;
+  private readonly magnitudeThreshold = 1.2;
+
+  private smoothedZ = this.zAtRest;
 
   private motionHandler = (event: DeviceMotionEvent) => {
     const ax = event.accelerationIncludingGravity?.x ?? 0;
     const ay = event.accelerationIncludingGravity?.y ?? 0;
     const az = event.accelerationIncludingGravity?.z ?? 0;
     const magnitude = Math.sqrt(ax ** 2 + ay ** 2 + az ** 2);
-    const delta = Math.abs(magnitude - 9.81);
+    this.smoothedZ = this.smoothedZ * this.smoothingFactor + az * (1 - this.smoothingFactor);
+
+    const zDelta = Math.abs(this.smoothedZ - this.zAtRest);
+    const magnitudeDelta = Math.abs(magnitude - this.zAtRest);
     const now = Date.now();
 
-    if (delta > this.threshold && now - this.lastStepAt > this.cooldownMs) {
+    if (now - this.lastStepAt > this.cooldownMs && (zDelta > this.zPeakThreshold || magnitudeDelta > this.magnitudeThreshold)) {
       this.lastStepAt = now;
       this.navigationService.registerStep();
     }
   };
 
   private orientationHandler = (event: DeviceOrientationEvent) => {
+    const compassHeading = (event as DeviceOrientationEvent & { webkitCompassHeading?: number }).webkitCompassHeading;
+
+    if (typeof compassHeading === 'number') {
+      this.navigationService.setHeading(compassHeading);
+      return;
+    }
+
     if (typeof event.alpha === 'number') {
       this.navigationService.setHeading(event.alpha);
     }
@@ -45,9 +60,11 @@ export class PedometerService {
       return false;
     }
 
-    const motionGranted = await this.requestMotionPermission();
-    const orientationGranted = await this.requestOrientationPermission();
-    return motionGranted && orientationGranted;
+    const motionPromise = this.requestMotionPermission();
+    const orientationPromise = this.requestOrientationPermission();
+    const [motionGranted, orientationGranted] = await Promise.all([motionPromise, orientationPromise]);
+
+    return motionGranted || orientationGranted;
   }
 
   startListening(): void {
