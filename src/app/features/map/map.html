@@ -9,7 +9,10 @@
 			<p class="map-badge">Objetivo: <span>{{ target?.loc ?? 'Sin destino' }}</span></p>
 		</div>
 
-		<div class="compass" [style.transform]="'rotate(' + heading + 'deg)'">🧭</div>
+		<div class="compass" aria-label="Brújula">
+			<span class="compass-n">N</span>
+			<span class="compass-arrow" [style.transform]="'rotate(' + heading + 'deg)'">▲</span>
+		</div>
 	</div>
 
 	<section class="instr-card">

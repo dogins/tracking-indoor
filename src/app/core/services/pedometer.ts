@@ -14,8 +14,10 @@ export class PedometerService {
   private readonly zPeakThreshold = 0.8;
   private readonly smoothingFactor = 0.7;
   private readonly magnitudeThreshold = 1.2;
+  private readonly headingSmoothingFactor = 0.25;
 
   private smoothedZ = this.zAtRest;
+  private smoothedHeading = 0;
 
   private motionHandler = (event: DeviceMotionEvent) => {
     const ax = event.accelerationIncludingGravity?.x ?? 0;
@@ -35,16 +37,13 @@ export class PedometerService {
   };
 
   private orientationHandler = (event: DeviceOrientationEvent) => {
-    const compassHeading = (event as DeviceOrientationEvent & { webkitCompassHeading?: number }).webkitCompassHeading;
-
-    if (typeof compassHeading === 'number') {
-      this.navigationService.setHeading(compassHeading);
+    const heading = this.getNormalizedCompassHeading(event);
+    if (heading === null) {
       return;
     }
 
-    if (typeof event.alpha === 'number') {
-      this.navigationService.setHeading(event.alpha);
-    }
+    this.smoothedHeading = this.smoothCircularAngle(this.smoothedHeading, heading, this.headingSmoothingFactor);
+    this.navigationService.setHeading(this.smoothedHeading);
   };
 
   isSupported(): boolean {
@@ -113,5 +112,46 @@ export class PedometerService {
     } catch {
       return false;
     }
+  }
+
+  private getNormalizedCompassHeading(event: DeviceOrientationEvent): number | null {
+    const iosHeading = (event as DeviceOrientationEvent & { webkitCompassHeading?: number }).webkitCompassHeading;
+    let heading: number | null = null;
+
+    if (typeof iosHeading === 'number' && Number.isFinite(iosHeading)) {
+      heading = iosHeading;
+    } else if (typeof event.alpha === 'number' && Number.isFinite(event.alpha)) {
+      heading = 360 - event.alpha;
+    }
+
+    if (heading === null) {
+      return null;
+    }
+
+    const correctedHeading = heading - this.getScreenOrientationOffset();
+    return this.normalizeAngle(correctedHeading);
+  }
+
+  private getScreenOrientationOffset(): number {
+    const screenOrientation = window.screen?.orientation?.angle;
+    if (typeof screenOrientation === 'number') {
+      return screenOrientation;
+    }
+
+    const legacyOrientation = (window as Window & { orientation?: number }).orientation;
+    if (typeof legacyOrientation === 'number') {
+      return legacyOrientation;
+    }
+
+    return 0;
+  }
+
+  private normalizeAngle(angle: number): number {
+    return ((angle % 360) + 360) % 360;
+  }
+
+  private smoothCircularAngle(previous: number, target: number, factor: number): number {
+    const delta = ((target - previous + 540) % 360) - 180;
+    return this.normalizeAngle(previous + delta * factor);
   }
 }
