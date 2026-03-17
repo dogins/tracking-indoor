@@ -17,15 +17,14 @@
 		<div>
 			<p class="instr-text">{{ instructionText }}</p>
 			<p class="instr-sub">Distancia estimada: {{ instructionDistance | distanceFormat }}</p>
+			<button type="button" class="sensor-cta" (click)="activateSensors()">Activar sensores</button>
+			@if (sensorMessage) {
+			<p class="instr-sub sensor-msg">{{ sensorMessage }}</p>
+			}
 		</div>
 	</section>
 
-	<app-sensor-bar
-		[steps]="steps"
-		[heading]="heading"
-		[distanceM]="totalDist"
-		[driftM]="driftError"
-	/>
+	<app-sensor-bar [steps]="steps" [heading]="heading" [distanceM]="totalDist" [driftM]="driftError" />
 
 	<nav class="bottom-nav" aria-label="Acciones del mapa">
 		<button type="button" class="nav-btn" disabled>Mapa</button>

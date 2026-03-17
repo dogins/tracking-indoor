@@ -36,23 +36,18 @@ export class PedometerService {
     return typeof window !== 'undefined' && 'DeviceMotionEvent' in window;
   }
 
+  isListening(): boolean {
+    return this.listening;
+  }
+
   async requestPermission(): Promise<boolean> {
     if (!this.isSupported()) {
       return false;
     }
 
-    const needsPermissionRequest = typeof (DeviceMotionEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission === 'function';
-
-    if (!needsPermissionRequest) {
-      return true;
-    }
-
-    try {
-      const status = await (DeviceMotionEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission();
-      return status === 'granted';
-    } catch {
-      return false;
-    }
+    const motionGranted = await this.requestMotionPermission();
+    const orientationGranted = await this.requestOrientationPermission();
+    return motionGranted && orientationGranted;
   }
 
   startListening(): void {
@@ -73,5 +68,33 @@ export class PedometerService {
     window.removeEventListener('devicemotion', this.motionHandler);
     window.removeEventListener('deviceorientation', this.orientationHandler);
     this.listening = false;
+  }
+
+  private async requestMotionPermission(): Promise<boolean> {
+    const request = (DeviceMotionEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission;
+    if (typeof request !== 'function') {
+      return true;
+    }
+
+    try {
+      const status = await request();
+      return status === 'granted';
+    } catch {
+      return false;
+    }
+  }
+
+  private async requestOrientationPermission(): Promise<boolean> {
+    const request = (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission;
+    if (typeof request !== 'function') {
+      return true;
+    }
+
+    try {
+      const status = await request();
+      return status === 'granted';
+    } catch {
+      return false;
+    }
   }
 }

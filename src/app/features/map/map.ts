@@ -63,6 +63,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   instructionArrow = '🧭';
   instructionText = 'Selecciona un producto para navegar';
   instructionDistance = 0;
+  sensorMessage = '';
 
   ngAfterViewInit(): void {
     this.canvas = this.canvasRef.nativeElement;
@@ -124,6 +125,22 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   reset(): void {
     this.stopSimulation();
     this.navigationService.reset();
+  }
+
+  async activateSensors(): Promise<void> {
+    if (this.pedometerService.isListening()) {
+      this.sensorMessage = 'Sensores ya están activos.';
+      return;
+    }
+
+    const granted = await this.pedometerService.requestPermission();
+    if (granted) {
+      this.pedometerService.startListening();
+      this.sensorMessage = 'Sensores activos: brújula y podómetro habilitados.';
+      return;
+    }
+
+    this.sensorMessage = 'No se pudo activar sensores. Revisa permisos del navegador.';
   }
 
   toggleSimulation(): void {

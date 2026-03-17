@@ -40,12 +40,18 @@ export class ScanComponent {
   }
 
   async selectZone(zone: Zone): Promise<void> {
-    const granted = await this.pedometerService.requestPermission();
-    if (!granted && this.pedometerService.isSupported()) {
-      this.permissionError.set('Permiso de sensores no otorgado. Puedes continuar en modo QR.');
+    const wantsSensors = window.confirm('¿Quieres activar brújula y podómetro para seguimiento en tiempo real?');
+
+    if (wantsSensors) {
+      const granted = await this.pedometerService.requestPermission();
+      if (!granted && this.pedometerService.isSupported()) {
+        this.permissionError.set('Permiso de sensores no otorgado. Puedes continuar en modo QR.');
+      } else {
+        this.permissionError.set('');
+        this.pedometerService.startListening();
+      }
     } else {
-      this.permissionError.set('');
-      this.pedometerService.startListening();
+      this.permissionError.set('Sensores desactivados. Navegación disponible en modo QR.');
     }
 
     this.navigationService.setZone(zone.id);
