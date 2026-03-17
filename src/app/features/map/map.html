@@ -1,40 +1,63 @@
 <section class="screen">
-	<app-topbar title="Mapa en vivo" subtitle="SEGUIMIENTO POR SENSORES" />
-
 	<div class="map-container">
 		<canvas #mapCanvas aria-label="Mapa de la tienda"></canvas>
 
-		<div class="map-overlay-tl">
-			<p class="map-badge">Posición: <span>{{ pos.x | number: '1.0-0' }}, {{ pos.y | number: '1.0-0' }}</span></p>
-			<p class="map-badge">Objetivo: <span>{{ target?.loc ?? 'Sin destino' }}</span></p>
+		<div class="search-fab">
+			<button type="button" class="search-pill" (click)="goToSearch()" aria-label="Buscar producto">
+				🔎 Buscar en tienda
+			</button>
 		</div>
 
-		<div class="compass" aria-label="Brújula: {{ heading | number:'1.0-0' }} grados">
-			<span class="compass-arrow" [style.transform]="'rotate(' + heading + 'deg)'">▲</span>
-			<span class="compass-deg">{{ heading | number:'1.0-0' }}°</span>
+		<div class="map-overlay-tl">
+			<p class="map-badge">Pos: <span>{{ pos.x | number: '1.0-0' }}, {{ pos.y | number: '1.0-0' }}</span></p>
+			<p class="map-badge">Destino: <span>{{ target?.loc ?? 'Sin destino' }}</span></p>
+		</div>
+
+		<div class="controls-stack">
+			<button type="button" class="round-btn compass" aria-label="Brújula: {{ heading | number:'1.0-0' }} grados">
+				<span class="compass-arrow" [style.transform]="'rotate(' + heading + 'deg)'">▲</span>
+				<span class="compass-deg">{{ heading | number:'1.0-0' }}°</span>
+			</button>
+
+			<button type="button" class="round-btn" (click)="activateSensors()" aria-label="Activar sensores">
+				📡
+			</button>
+
+			<button type="button" class="round-btn" (click)="goToScan()" aria-label="Recalibrar con QR">
+				QR
+			</button>
+
+			<button type="button" class="round-btn" (click)="reset()" aria-label="Resetear navegación">
+				↺
+			</button>
 		</div>
 	</div>
 
-	<section class="instr-card">
-		<div class="instr-arrow-box">{{ instructionArrow }}</div>
-		<div>
-			<p class="instr-text">{{ instructionText }}</p>
-			<p class="instr-sub">Distancia estimada: {{ instructionDistance | distanceFormat }}</p>
-			<button type="button" class="sensor-cta" (click)="activateSensors()">Activar sensores</button>
-			@if (sensorMessage) {
-			<p class="instr-sub sensor-msg">{{ sensorMessage }}</p>
-			}
+	<section class="bottom-sheet">
+		<div class="handle"></div>
+
+		<div class="route-summary">
+			<div class="instr-arrow-box">{{ instructionArrow }}</div>
+			<div>
+				<p class="instr-text">{{ instructionText }}</p>
+				<p class="instr-sub">Distancia estimada: {{ instructionDistance | distanceFormat }}</p>
+			</div>
+		</div>
+
+		<div class="stat-row">
+			<p class="stat-chip">👣 {{ steps }} pasos</p>
+			<p class="stat-chip">🧭 {{ heading | number:'1.0-0' }}°</p>
+			<p class="stat-chip">📏 {{ totalDist | number:'1.1-1' }} m</p>
+		</div>
+
+		@if (sensorMessage) {
+			<p class="sensor-msg">{{ sensorMessage }}</p>
+		}
+
+		<div class="sheet-actions">
+			<button type="button" class="action-btn primary" (click)="toggleSimulation()">Simular ruta</button>
+			<button type="button" class="action-btn" (click)="goToSearch()">Buscar producto</button>
 		</div>
 	</section>
 
-	<app-sensor-bar [steps]="steps" [heading]="heading" [distanceM]="totalDist" [driftM]="driftError" />
-
-	<nav class="bottom-nav" aria-label="Acciones del mapa">
-		<button type="button" class="nav-btn" disabled>Mapa</button>
-		<button type="button" class="nav-btn" (click)="goToSearch()">Buscar</button>
-		<button type="button" class="nav-btn" (click)="toggleSimulation()">Simular</button>
-		<button type="button" class="nav-btn danger" (click)="reset()">Reset</button>
-	</nav>
-
-	<button type="button" class="floating-back" (click)="goToScan()" aria-label="Volver a escanear zona">QR</button>
 </section>

@@ -21,14 +21,12 @@ import { NavigationService } from '../../core/services/navigation';
 import { PedometerService } from '../../core/services/pedometer';
 import { RouteService } from '../../core/services/route';
 import { StoreMapService } from '../../core/services/store-map';
-import { SensorBarComponent } from '../../shared/components/sensor-bar/sensor-bar';
-import { TopbarComponent } from '../../shared/components/topbar/topbar';
 import { DistanceFormatPipe } from '../../shared/pipes/distance-format-pipe';
 
 @Component({
   selector: 'app-map-screen',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, DistanceFormatPipe, SensorBarComponent, TopbarComponent],
+  imports: [DecimalPipe, DistanceFormatPipe],
   templateUrl: './map.html',
   styleUrl: './map.scss',
 })
