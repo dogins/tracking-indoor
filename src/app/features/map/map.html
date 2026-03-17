@@ -9,9 +9,9 @@
 			<p class="map-badge">Objetivo: <span>{{ target?.loc ?? 'Sin destino' }}</span></p>
 		</div>
 
-		<div class="compass" aria-label="Brújula">
-			<span class="compass-n">N</span>
+		<div class="compass" aria-label="Brújula: {{ heading | number:'1.0-0' }} grados">
 			<span class="compass-arrow" [style.transform]="'rotate(' + heading + 'deg)'">▲</span>
+			<span class="compass-deg">{{ heading | number:'1.0-0' }}°</span>
 		</div>
 	</div>
 

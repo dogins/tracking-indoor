@@ -49,31 +49,34 @@ canvas {
   top: 10px;
   right: 10px;
   width: 48px;
-  height: 48px;
+  height: 54px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 12px;
   border: 1px solid var(--border2);
-  background: rgba(15, 15, 13, 0.85);
-}
-
-.compass-n {
-  position: absolute;
-  top: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 9px;
-  color: var(--text2);
-  font-family: 'DM Mono', monospace;
+  background: rgba(15, 15, 13, 0.88);
+  gap: 0;
+  padding: 4px;
 }
 
 .compass-arrow {
   color: var(--accent);
   font-size: 18px;
   line-height: 1;
+  display: block;
   transform-origin: 50% 65%;
-  transition: transform 120ms linear;
+  transition: transform 150ms linear;
+}
+
+.compass-deg {
+  display: block;
+  font-size: 8px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text2);
+  margin-top: 2px;
+  text-align: center;
 }
 
 .instr-card {
