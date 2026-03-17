@@ -1,0 +1,27 @@
+<section class="screen">
+	<app-topbar title="Escanear zona" subtitle="TOCA TU PASILLO" />
+
+	<main class="scan-main">
+		<h2>Selecciona tu ubicación actual</h2>
+		<p class="scan-help">Esto simula el escaneo del QR del pasillo.</p>
+
+		<div class="zone-grid">
+			@for (zone of zones$ | async; track zone.id) {
+				<button
+					type="button"
+					class="zone-card"
+					[attr.aria-label]="'Seleccionar zona ' + zone.name"
+					(click)="selectZone(zone)"
+				>
+					<span class="zone-icon">{{ zone.icon }}</span>
+					<span class="zone-code">{{ zone.code }}</span>
+					<span class="zone-name">{{ zone.name }}</span>
+				</button>
+			}
+		</div>
+
+		@if (permissionError()) {
+			<p class="error">{{ permissionError() }}</p>
+		}
+	</main>
+</section>

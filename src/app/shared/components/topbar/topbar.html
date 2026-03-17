@@ -1,0 +1,10 @@
+@if (showBack()) {
+	<button type="button" class="back-btn" (click)="onBackClick()" [attr.aria-label]="backLabel()">
+		←
+	</button>
+}
+
+<div class="topbar-info">
+	<h1 class="topbar-title">{{ title() }}</h1>
+	<p class="topbar-sub">{{ subtitle() }}</p>
+</div>

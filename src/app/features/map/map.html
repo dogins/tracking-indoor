@@ -1,0 +1,38 @@
+<section class="screen">
+	<app-topbar title="Mapa en vivo" subtitle="SEGUIMIENTO POR SENSORES" />
+
+	<div class="map-container">
+		<canvas #mapCanvas aria-label="Mapa de la tienda"></canvas>
+
+		<div class="map-overlay-tl">
+			<p class="map-badge">Posición: <span>{{ pos.x | number: '1.0-0' }}, {{ pos.y | number: '1.0-0' }}</span></p>
+			<p class="map-badge">Objetivo: <span>{{ target?.loc ?? 'Sin destino' }}</span></p>
+		</div>
+
+		<div class="compass" [style.transform]="'rotate(' + heading + 'deg)'">🧭</div>
+	</div>
+
+	<section class="instr-card">
+		<div class="instr-arrow-box">{{ instructionArrow }}</div>
+		<div>
+			<p class="instr-text">{{ instructionText }}</p>
+			<p class="instr-sub">Distancia estimada: {{ instructionDistance | distanceFormat }}</p>
+		</div>
+	</section>
+
+	<app-sensor-bar
+		[steps]="steps"
+		[heading]="heading"
+		[distanceM]="totalDist"
+		[driftM]="driftError"
+	/>
+
+	<nav class="bottom-nav" aria-label="Acciones del mapa">
+		<button type="button" class="nav-btn" disabled>Mapa</button>
+		<button type="button" class="nav-btn" (click)="goToSearch()">Buscar</button>
+		<button type="button" class="nav-btn" (click)="toggleSimulation()">Simular</button>
+		<button type="button" class="nav-btn danger" (click)="reset()">Reset</button>
+	</nav>
+
+	<button type="button" class="floating-back" (click)="goToScan()" aria-label="Volver a escanear zona">QR</button>
+</section>

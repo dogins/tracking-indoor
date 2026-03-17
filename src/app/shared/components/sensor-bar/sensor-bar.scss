@@ -1,0 +1,31 @@
+:host {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 8px;
+	padding: 10px 14px;
+	background: var(--bg2);
+	border-top: 1px solid var(--border);
+}
+
+.sensor-cell {
+	border-radius: 10px;
+	border: 1px solid var(--border);
+	background: var(--bg3);
+	padding: 8px 10px;
+	text-align: center;
+}
+
+.sensor-val {
+	margin: 0;
+	color: var(--accent);
+	font-size: 16px;
+	font-family: 'DM Mono', monospace;
+}
+
+.sensor-name {
+	margin-top: 4px;
+	color: var(--text3);
+	font-size: 9px;
+	letter-spacing: 0.05em;
+	font-family: 'DM Mono', monospace;
+}
