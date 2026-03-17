@@ -1,10 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { NavigationService } from './navigation';
 
-// Threshold for linear acceleration magnitude (m/s²) to detect a step.
-// Uses event.acceleration (gravity-free) — much simpler than gravity-based heuristics.
-const STEP_THRESHOLD = 1.5;
-const STEP_COOLDOWN_MS = 350;
+const STEP_PEAK_THRESHOLD = 1.2;
+const STEP_VALLEY_THRESHOLD = 0.35;
+const STEP_COOLDOWN_MS = 320;
+const STEP_MIN_MS = 90;
+const STEP_MAX_MS = 700;
+const SHAKE_REJECT_THRESHOLD = 4.8;
+const MAGNITUDE_SMOOTHING = 0.6;
+const GRAVITY_SMOOTHING = 0.85;
 
 @Injectable({
   providedIn: 'root',
@@ -14,29 +18,85 @@ export class PedometerService {
 
   private listening = false;
   private lastStepAt = 0;
+  private inStepCandidate = false;
+  private candidateStartedAt = 0;
+  private smoothedMagnitude = 0;
+
+  private gravityX = 0;
+  private gravityY = 0;
+  private gravityZ = 0;
 
   // ── Step detection ─────────────────────────────────────────────────────────
-  // Uses linear acceleration (no gravity). Peaks > threshold = one step.
+  // Detects a step only if we observe a clear peak then valley in a valid time window.
   private readonly motionHandler = (event: DeviceMotionEvent) => {
-    const a = event.acceleration;
+    const linear = this.getLinearAcceleration(event);
+    if (!linear) return;
 
-    let magnitude = 0;
-    if (a) {
-      magnitude = Math.sqrt((a.x ?? 0) ** 2 + (a.y ?? 0) ** 2 + (a.z ?? 0) ** 2);
-    } else {
-      const g = event.accelerationIncludingGravity;
-      if (!g) return;
-      const gravityMagnitude = Math.sqrt((g.x ?? 0) ** 2 + (g.y ?? 0) ** 2 + (g.z ?? 0) ** 2);
-      magnitude = Math.abs(gravityMagnitude - 9.81);
-    }
+    const magnitude = Math.sqrt(linear.x ** 2 + linear.y ** 2 + linear.z ** 2);
+    this.smoothedMagnitude = this.smoothedMagnitude * MAGNITUDE_SMOOTHING + magnitude * (1 - MAGNITUDE_SMOOTHING);
 
     const now = Date.now();
 
-    if (magnitude > STEP_THRESHOLD && now - this.lastStepAt > STEP_COOLDOWN_MS) {
+    if (this.smoothedMagnitude > SHAKE_REJECT_THRESHOLD) {
+      this.inStepCandidate = false;
+      return;
+    }
+
+    if (!this.inStepCandidate) {
+      if (this.smoothedMagnitude >= STEP_PEAK_THRESHOLD && now - this.lastStepAt > STEP_COOLDOWN_MS) {
+        this.inStepCandidate = true;
+        this.candidateStartedAt = now;
+      }
+      return;
+    }
+
+    const candidateDuration = now - this.candidateStartedAt;
+
+    if (candidateDuration > STEP_MAX_MS) {
+      this.inStepCandidate = false;
+      return;
+    }
+
+    if (this.smoothedMagnitude <= STEP_VALLEY_THRESHOLD && candidateDuration >= STEP_MIN_MS) {
       this.lastStepAt = now;
+      this.inStepCandidate = false;
       this.navigationService.registerStep();
     }
   };
+
+  private getLinearAcceleration(event: DeviceMotionEvent): { x: number; y: number; z: number } | null {
+    const linear = event.acceleration;
+    if (linear && this.isFinite3(linear.x, linear.y, linear.z)) {
+      return {
+        x: linear.x ?? 0,
+        y: linear.y ?? 0,
+        z: linear.z ?? 0,
+      };
+    }
+
+    const withGravity = event.accelerationIncludingGravity;
+    if (!withGravity || !this.isFinite3(withGravity.x, withGravity.y, withGravity.z)) {
+      return null;
+    }
+
+    const gx = withGravity.x ?? 0;
+    const gy = withGravity.y ?? 0;
+    const gz = withGravity.z ?? 0;
+
+    this.gravityX = this.gravityX * GRAVITY_SMOOTHING + gx * (1 - GRAVITY_SMOOTHING);
+    this.gravityY = this.gravityY * GRAVITY_SMOOTHING + gy * (1 - GRAVITY_SMOOTHING);
+    this.gravityZ = this.gravityZ * GRAVITY_SMOOTHING + gz * (1 - GRAVITY_SMOOTHING);
+
+    return {
+      x: gx - this.gravityX,
+      y: gy - this.gravityY,
+      z: gz - this.gravityZ,
+    };
+  }
+
+  private isFinite3(x: number | null | undefined, y: number | null | undefined, z: number | null | undefined): boolean {
+    return Number.isFinite(x ?? NaN) && Number.isFinite(y ?? NaN) && Number.isFinite(z ?? NaN);
+  }
 
   // ── Compass heading ────────────────────────────────────────────────────────
   // iOS: webkitCompassHeading is true-north, 0 = North, 90 = East.
