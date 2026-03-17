@@ -3,12 +3,19 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+
+permissions:
+  contents: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -22,8 +29,21 @@ jobs:
       - name: Build
         run: npm run build -- --configuration production
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist/tracking-indoor/browser
+      - name: Sync build to docs
+        run: |
+          rm -rf docs
+          mkdir -p docs
+          cp -R dist/tracking-indoor/browser/. docs/
+          touch docs/.nojekyll
+
+      - name: Commit docs to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- docs; then
+            echo "No docs changes to commit"
+            exit 0
+          fi
+          git add docs
+          git commit -m "chore(pages): update docs"
+          git push origin main

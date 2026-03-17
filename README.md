@@ -31,12 +31,25 @@ Este repo está configurado para Pages con hash routing (`/#/scan`) y base href 
 ### Automático (recomendado)
 
 - Cada push a `main` dispara `.github/workflows/deploy.yml`.
-- Publica `dist/tracking-indoor/browser`.
+- Genera build y sincroniza `docs/` en la rama `main`.
+
+### Si ves el README en lugar de la app
+
+Eso ocurre cuando GitHub Pages está apuntando a `main` + `/root` en vez de `main` + `/docs`.
+
+Configura en GitHub:
+
+- `Settings > Pages > Build and deployment`
+- `Source`: `Deploy from a branch`
+- `Branch`: `main` y carpeta `/docs`
+
+URL correcta esperada:
+
+- `https://dogins.github.io/tracking-indoor/`
 
 ### Manual
 
 ```bash
-npm run build
 npm run deploy
 ```
 

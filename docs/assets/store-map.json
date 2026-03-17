@@ -1,0 +1,40 @@
+{
+  "aisles": [
+    {"x":20,"y":30,"w":80,"h":400,"name":"Pintura","code":"P1","color":"#1e2e1e"},
+    {"x":110,"y":30,"w":80,"h":400,"name":"Eléctrico","code":"P2","color":"#1a2030"},
+    {"x":200,"y":30,"w":80,"h":400,"name":"Herramientas","code":"P3","color":"#2a2010"},
+    {"x":290,"y":30,"w":80,"h":400,"name":"Plomería","code":"P4","color":"#1e2020"},
+    {"x":380,"y":30,"w":80,"h":400,"name":"Fijaciones","code":"P5","color":"#201a28"},
+    {"x":470,"y":30,"w":110,"h":400,"name":"Ofertas","code":"OF","color":"#2a1818"}
+  ],
+  "zones": [
+    {"id":"entrada","name":"Entrada","code":"ENT","icon":"🚪","anchorPos":{"x":300,"y":480}},
+    {"id":"p1","name":"Pintura","code":"P1","icon":"🎨","anchorPos":{"x":60,"y":240}},
+    {"id":"p2","name":"Eléctrico","code":"P2","icon":"⚡","anchorPos":{"x":150,"y":240}},
+    {"id":"p3","name":"Herramientas","code":"P3","icon":"🔧","anchorPos":{"x":240,"y":240}},
+    {"id":"p4","name":"Plomería","code":"P4","icon":"🚿","anchorPos":{"x":330,"y":240}},
+    {"id":"p5","name":"Fijaciones","code":"P5","icon":"🔩","anchorPos":{"x":420,"y":240}}
+  ],
+  "qrPoints": [
+    {"pos":{"x":60,"y":240},"zoneId":"p1"},
+    {"pos":{"x":150,"y":240},"zoneId":"p2"},
+    {"pos":{"x":240,"y":240},"zoneId":"p3"},
+    {"pos":{"x":330,"y":240},"zoneId":"p4"},
+    {"pos":{"x":420,"y":240},"zoneId":"p5"},
+    {"pos":{"x":300,"y":480},"zoneId":"entrada"}
+  ],
+  "products": [
+    {"id":1,"name":"Grifo monomando 1/2\"","meta":"Cromado, rosca 1/2\"","price":"$24.990","emoji":"🚿","zoneId":"p4","loc":"P4·B3","destPos":{"x":330,"y":160}},
+    {"id":2,"name":"Teflón sellador 12m","meta":"Cinta blanca","price":"$890","emoji":"🔩","zoneId":"p4","loc":"P4·B1","destPos":{"x":330,"y":200}},
+    {"id":3,"name":"Llave de paso 1/2\"","meta":"Para corte de agua","price":"$5.490","emoji":"🔧","zoneId":"p4","loc":"P4·A4","destPos":{"x":330,"y":300}},
+    {"id":4,"name":"Látex lavable blanco 4L","meta":"Rinde ~32m²","price":"$18.990","emoji":"🎨","zoneId":"p1","loc":"P1·A2","destPos":{"x":60,"y":180}},
+    {"id":5,"name":"Rodillo 23cm + bandeja","meta":"Para superficies lisas","price":"$4.290","emoji":"🖌️","zoneId":"p1","loc":"P1·A4","destPos":{"x":60,"y":280}},
+    {"id":6,"name":"Cable THHN 2.5mm x10m","meta":"Calibre 12, blanco","price":"$8.490","emoji":"⚡","zoneId":"p2","loc":"P2·E2","destPos":{"x":150,"y":200}},
+    {"id":7,"name":"Enchufe doble empotrable","meta":"Con toma de tierra","price":"$4.990","emoji":"🔌","zoneId":"p2","loc":"P2·E4","destPos":{"x":150,"y":300}},
+    {"id":8,"name":"LED 9W E27 luz fría x4","meta":"Pack ahorro","price":"$4.490","emoji":"💡","zoneId":"p2","loc":"P2·E1","destPos":{"x":150,"y":160}},
+    {"id":9,"name":"Llave inglesa 10\"-12\"","meta":"Acero cromado","price":"$8.990","emoji":"🔧","zoneId":"p3","loc":"P3·C2","destPos":{"x":240,"y":200}},
+    {"id":10,"name":"Martillo 500g Stanley","meta":"Oferta hoy","price":"$9.990","emoji":"🔨","zoneId":"p3","loc":"P3·C3","destPos":{"x":240,"y":260}},
+    {"id":11,"name":"Tornillos madera 4x40 x100","meta":"Caja económica","price":"$3.490","emoji":"🔩","zoneId":"p5","loc":"P5·D1","destPos":{"x":420,"y":180}},
+    {"id":12,"name":"Taco Fisher 6mm x50","meta":"Para concreto","price":"$4.290","emoji":"⚓","zoneId":"p5","loc":"P5·D2","destPos":{"x":420,"y":240}}
+  ]
+}
