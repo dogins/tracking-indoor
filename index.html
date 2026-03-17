@@ -1265,6 +1265,11 @@
 
     // ── PEDOMETER (real device) ─────────────────────────────────────────────────
     let lastAcc = null, stepCooldown = false;
+    let smoothedZ = 0; // Aceleración Z suavizada con filtro de paso bajo
+    let lastSmoothedZ = 0;
+    const SMOOTHING_FACTOR = 0.7; // IIR filter (más bajo = más suavizado, rango 0-1)
+    const Z_PEAK_THRESHOLD = 0.8; // Umbral para detectar picos en eje Z (m/s²)
+    const Z_AT_REST = 9.81; // Aceleración de la gravedad en reposo
 
     function requestMotionPermission() {
       if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -1290,15 +1295,31 @@
 
     function handleMotion(e) {
       const acc = e.accelerationIncludingGravity;
-      if (!acc || !lastAcc) { lastAcc = acc; return; }
-      const mag = Math.sqrt(
-        (acc.x - lastAcc.x) ** 2 + (acc.y - lastAcc.y) ** 2 + (acc.z - lastAcc.z) ** 2
-      );
-      if (mag > 2.5 && !stepCooldown) {
+      if (!acc) return;
+
+      // Inicializar en el primer evento
+      if (lastAcc === null) {
+        lastAcc = acc;
+        smoothedZ = (acc.z || 0);
+        return;
+      }
+
+      // Aplicar filtro de paso bajo (IIR suavizado exponencial)
+      // suavizado = suavizado_anterior × factor + nuevo × (1 - factor)
+      smoothedZ = smoothedZ * SMOOTHING_FACTOR + (acc.z || 0) * (1 - SMOOTHING_FACTOR);
+
+      // Detectar picos en el eje Z (vertical)
+      // El impacto del paso causa fluctuaciones significativas alrededor de 9.81 m/s²
+      const normalizedZ = Math.abs(smoothedZ - Z_AT_REST);
+
+      // Registrar un paso cuando hay un pico significativo y no hay cooldown
+      if (normalizedZ > Z_PEAK_THRESHOLD && !stepCooldown) {
         registerStep();
         stepCooldown = true;
-        setTimeout(() => stepCooldown = false, 350);
+        setTimeout(() => stepCooldown = false, 300); // cooldown de 300ms = max 200 pasos/min
       }
+
+      lastSmoothedZ = smoothedZ;
       lastAcc = acc;
     }
 
