@@ -14,7 +14,7 @@ export class NavigationService {
   private readonly routeService = inject(RouteService);
   private readonly storeMapService = inject(StoreMapService);
 
-  readonly pos$ = new BehaviorSubject<Position>({ x: 300, y: 480 });
+  readonly pos$ = new BehaviorSubject<Position>({ x: 300, y: 500 });
   readonly steps$ = new BehaviorSubject<number>(0);
   readonly totalDist$ = new BehaviorSubject<number>(0);
   readonly driftError$ = new BehaviorSubject<number>(0);
@@ -24,7 +24,7 @@ export class NavigationService {
   readonly trail$ = new BehaviorSubject<Position[]>([]);
   readonly routeWaypoints$ = new BehaviorSubject<Position[]>([]);
 
-  private readonly strideMeters = 0.75;
+  private readonly strideMeters = 0.65;
   private readonly logicalUnitsPerMeter = 20;
   private readonly qrCalibRadiusLogical = 30;
   private activeQrInRange: string | null = null;
@@ -87,7 +87,7 @@ export class NavigationService {
   }
 
   reset(): void {
-    this.pos$.next({ x: 300, y: 480 });
+    this.pos$.next({ x: 300, y: 500 });
     this.steps$.next(0);
     this.totalDist$.next(0);
     this.driftError$.next(0);

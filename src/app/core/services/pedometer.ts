@@ -1,14 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { NavigationService } from './navigation';
 
-const STEP_PEAK_THRESHOLD = 1.2;
-const STEP_VALLEY_THRESHOLD = 0.35;
-const STEP_COOLDOWN_MS = 320;
-const STEP_MIN_MS = 90;
-const STEP_MAX_MS = 700;
-const SHAKE_REJECT_THRESHOLD = 4.8;
-const MAGNITUDE_SMOOTHING = 0.6;
-const GRAVITY_SMOOTHING = 0.85;
+const STEP_PEAK_DEVIATION = 0.5;
+const STEP_VALLEY_RETURN = 0.15;
+const STEP_COOLDOWN_MS = 280;
+const STEP_MIN_MS = 100;
+const STEP_MAX_MS = 600;
+const SHAKE_REJECT_THRESHOLD = 5.0;
+const MAGNITUDE_SMOOTHING = 0.72;
+const GRAVITY_SMOOTHING = 0.9;
+const BASELINE_SMOOTHING = 0.985;
 
 @Injectable({
   providedIn: 'root',
@@ -21,13 +22,15 @@ export class PedometerService {
   private inStepCandidate = false;
   private candidateStartedAt = 0;
   private smoothedMagnitude = 0;
+  private baselineMagnitude = 0;
+  private baselineReady = false;
 
   private gravityX = 0;
   private gravityY = 0;
   private gravityZ = 0;
 
-  // ── Step detection ─────────────────────────────────────────────────────────
-  // Detects a step only if we observe a clear peak then valley in a valid time window.
+  // ── Step detection (adaptive baseline + peak-valley) ───────────────────────
+  // Tracks a running baseline of resting magnitude, detects steps as deviations above it.
   private readonly motionHandler = (event: DeviceMotionEvent) => {
     const linear = this.getLinearAcceleration(event);
     if (!linear) return;
@@ -35,6 +38,14 @@ export class PedometerService {
     const magnitude = Math.sqrt(linear.x ** 2 + linear.y ** 2 + linear.z ** 2);
     this.smoothedMagnitude = this.smoothedMagnitude * MAGNITUDE_SMOOTHING + magnitude * (1 - MAGNITUDE_SMOOTHING);
 
+    if (!this.baselineReady) {
+      this.baselineMagnitude = this.smoothedMagnitude;
+      this.baselineReady = true;
+    } else {
+      this.baselineMagnitude = this.baselineMagnitude * BASELINE_SMOOTHING + this.smoothedMagnitude * (1 - BASELINE_SMOOTHING);
+    }
+
+    const deviation = this.smoothedMagnitude - this.baselineMagnitude;
     const now = Date.now();
 
     if (this.smoothedMagnitude > SHAKE_REJECT_THRESHOLD) {
@@ -43,7 +54,7 @@ export class PedometerService {
     }
 
     if (!this.inStepCandidate) {
-      if (this.smoothedMagnitude >= STEP_PEAK_THRESHOLD && now - this.lastStepAt > STEP_COOLDOWN_MS) {
+      if (deviation >= STEP_PEAK_DEVIATION && now - this.lastStepAt > STEP_COOLDOWN_MS) {
         this.inStepCandidate = true;
         this.candidateStartedAt = now;
       }
@@ -57,7 +68,7 @@ export class PedometerService {
       return;
     }
 
-    if (this.smoothedMagnitude <= STEP_VALLEY_THRESHOLD && candidateDuration >= STEP_MIN_MS) {
+    if (deviation <= STEP_VALLEY_RETURN && candidateDuration >= STEP_MIN_MS) {
       this.lastStepAt = now;
       this.inStepCandidate = false;
       this.navigationService.registerStep();
@@ -132,6 +143,11 @@ export class PedometerService {
 
   startListening(): void {
     if (this.listening) return;
+
+    this.smoothedMagnitude = 0;
+    this.baselineMagnitude = 0;
+    this.baselineReady = false;
+    this.inStepCandidate = false;
 
     window.addEventListener('devicemotion', this.motionHandler);
     window.addEventListener('deviceorientation', this.orientationHandler);

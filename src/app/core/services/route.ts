@@ -6,7 +6,7 @@ import { Product } from '../models/product.model';
   providedIn: 'root',
 })
 export class RouteService {
-  private readonly corridorY = 430;
+  private readonly corridorY = 420;
 
   buildRoute(from: Position, to: Position): Position[] {
     return [
