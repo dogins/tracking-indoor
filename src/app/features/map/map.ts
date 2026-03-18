@@ -51,7 +51,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private readonly mapHeight = 560;
 
   aisles: MapAisle[] = [];
-  pos: Position = { x: 300, y: 480 };
+  pos: Position = { x: 300, y: 500 };
   heading = 0;
   steps = 0;
   totalDist = 0;
@@ -59,6 +59,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   trail: Position[] = [];
   routeWaypoints: Position[] = [];
   target: Product | null = null;
+  pathSegments: { from: Position; to: Position }[] = [];
 
   instructionArrow = '🧭';
   instructionText = 'Selecciona un producto para navegar';
@@ -86,9 +87,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.navigationService.trail$,
       this.navigationService.routeWaypoints$,
       this.navigationService.target$,
+      this.storeMapService.pathNodes$,
+      this.storeMapService.pathEdges$,
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(([aisles, pos, heading, steps, totalDist, driftError, trail, routeWaypoints, target]) => {
+      .subscribe(([aisles, pos, heading, steps, totalDist, driftError, trail, routeWaypoints, target, pathNodes, pathEdges]) => {
         this.aisles = aisles;
         this.pos = pos;
         this.heading = heading;
@@ -98,6 +101,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.trail = trail;
         this.routeWaypoints = routeWaypoints;
         this.target = target;
+
+        const nodeMap = new Map(pathNodes.map((n) => [n.id, n.pos]));
+        this.pathSegments = pathEdges
+          .map(([a, b]) => ({ from: nodeMap.get(a)!, to: nodeMap.get(b)! }))
+          .filter((seg) => seg.from && seg.to);
 
         const instruction = this.routeService.getNextInstruction(this.pos, this.routeWaypoints, this.target);
         this.instructionArrow = instruction.arrow;
@@ -230,28 +238,30 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const h = this.canvas.height;
     const { scale } = this.logToCanvas(0, 0);
 
-    // Background (Google Maps off-white)
+    // Background (ground)
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = '#f0ede6';
+    ctx.fillStyle = '#e8e6e1';
     ctx.fillRect(0, 0, w, h);
 
-    // Grid every 5 meters (100 logical units)
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.lineWidth = 1;
-    for (let lx = 0; lx <= this.mapWidth; lx += 100) {
-      const p1 = this.logToCanvas(lx, 0);
-      const p2 = this.logToCanvas(lx, this.mapHeight);
+    // Walkable paths (white roads with border)
+    for (const seg of this.pathSegments) {
+      const p1 = this.logToCanvas(seg.from.x, seg.from.y);
+      const p2 = this.logToCanvas(seg.to.x, seg.to.y);
+
       ctx.beginPath();
       ctx.moveTo(p1.x, p1.y);
       ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = '#d5d2cc';
+      ctx.lineWidth = Math.max(18, 28 * scale);
+      ctx.lineCap = 'round';
       ctx.stroke();
-    }
-    for (let ly = 0; ly <= this.mapHeight; ly += 100) {
-      const p1 = this.logToCanvas(0, ly);
-      const p2 = this.logToCanvas(this.mapWidth, ly);
+
       ctx.beginPath();
       ctx.moveTo(p1.x, p1.y);
       ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(16, 26 * scale);
+      ctx.lineCap = 'round';
       ctx.stroke();
     }
 
@@ -336,22 +346,43 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       ctx.fill();
     }
 
-    // User position (Google Maps blue dot with accuracy halo)
-    const user = this.logToCanvas(this.pos.x, this.pos.y);
-    ctx.beginPath();
-    ctx.arc(user.x, user.y, 18, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(66, 133, 244, 0.15)';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(user.x, user.y, 8, 0, Math.PI * 2);
-    ctx.fillStyle = '#4285F4';
-    ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
+    // User position (directional arrow)
+    this.drawUserArrow(ctx);
 
     // Scale bar
     this.drawScaleBar(ctx, scale);
+  }
+
+  private drawUserArrow(ctx: CanvasRenderingContext2D): void {
+    const user = this.logToCanvas(this.pos.x, this.pos.y);
+    const headingRad = (this.heading * Math.PI) / 180;
+
+    // Accuracy halo
+    ctx.beginPath();
+    ctx.arc(user.x, user.y, 20, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(66, 133, 244, 0.12)';
+    ctx.fill();
+
+    // Arrow pointing in heading direction
+    ctx.save();
+    ctx.translate(user.x, user.y);
+    ctx.rotate(headingRad);
+
+    const s = 11;
+    ctx.beginPath();
+    ctx.moveTo(0, -s);              // tip
+    ctx.lineTo(-s * 0.65, s * 0.5); // bottom-left
+    ctx.lineTo(0, s * 0.15);        // notch
+    ctx.lineTo(s * 0.65, s * 0.5);  // bottom-right
+    ctx.closePath();
+
+    ctx.fillStyle = '#4285F4';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.restore();
   }
 
   private drawScaleBar(ctx: CanvasRenderingContext2D, scale: number): void {

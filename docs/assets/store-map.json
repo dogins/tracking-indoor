@@ -36,43 +36,43 @@
       "name": "Pintura",
       "code": "P1",
       "icon": "🎨",
-      "anchorPos": { "x": 42, "y": 220 }
+      "anchorPos": { "x": 87, "y": 220 }
     },
     {
       "id": "p2",
       "name": "Eléctrico",
       "code": "P2",
       "icon": "⚡",
-      "anchorPos": { "x": 132, "y": 220 }
+      "anchorPos": { "x": 177, "y": 220 }
     },
     {
       "id": "p3",
       "name": "Herramientas",
       "code": "P3",
       "icon": "🔧",
-      "anchorPos": { "x": 222, "y": 220 }
+      "anchorPos": { "x": 267, "y": 220 }
     },
     {
       "id": "p4",
       "name": "Plomería",
       "code": "P4",
       "icon": "🚿",
-      "anchorPos": { "x": 312, "y": 220 }
+      "anchorPos": { "x": 357, "y": 220 }
     },
     {
       "id": "p5",
       "name": "Fijaciones",
       "code": "P5",
       "icon": "🔩",
-      "anchorPos": { "x": 402, "y": 220 }
+      "anchorPos": { "x": 447, "y": 220 }
     }
   ],
   "qrPoints": [
-    { "pos": { "x": 42, "y": 220 }, "zoneId": "p1" },
-    { "pos": { "x": 132, "y": 220 }, "zoneId": "p2" },
-    { "pos": { "x": 222, "y": 220 }, "zoneId": "p3" },
-    { "pos": { "x": 312, "y": 220 }, "zoneId": "p4" },
-    { "pos": { "x": 402, "y": 220 }, "zoneId": "p5" },
+    { "pos": { "x": 87, "y": 220 }, "zoneId": "p1" },
+    { "pos": { "x": 177, "y": 220 }, "zoneId": "p2" },
+    { "pos": { "x": 267, "y": 220 }, "zoneId": "p3" },
+    { "pos": { "x": 357, "y": 220 }, "zoneId": "p4" },
+    { "pos": { "x": 447, "y": 220 }, "zoneId": "p5" },
     { "pos": { "x": 300, "y": 500 }, "zoneId": "entrada" }
   ],
   "products": [
@@ -84,7 +84,7 @@
       "emoji": "🚿",
       "zoneId": "p4",
       "loc": "P4·B3",
-      "destPos": { "x": 312, "y": 150 }
+      "destPos": { "x": 357, "y": 150 }
     },
     {
       "id": 2,
@@ -94,7 +94,7 @@
       "emoji": "🔩",
       "zoneId": "p4",
       "loc": "P4·B1",
-      "destPos": { "x": 312, "y": 200 }
+      "destPos": { "x": 357, "y": 200 }
     },
     {
       "id": 3,
@@ -104,7 +104,7 @@
       "emoji": "🔧",
       "zoneId": "p4",
       "loc": "P4·A4",
-      "destPos": { "x": 312, "y": 300 }
+      "destPos": { "x": 357, "y": 300 }
     },
     {
       "id": 4,
@@ -114,7 +114,7 @@
       "emoji": "🎨",
       "zoneId": "p1",
       "loc": "P1·A2",
-      "destPos": { "x": 42, "y": 170 }
+      "destPos": { "x": 87, "y": 170 }
     },
     {
       "id": 5,
@@ -124,7 +124,7 @@
       "emoji": "🖌️",
       "zoneId": "p1",
       "loc": "P1·A4",
-      "destPos": { "x": 42, "y": 280 }
+      "destPos": { "x": 87, "y": 280 }
     },
     {
       "id": 6,
@@ -134,7 +134,7 @@
       "emoji": "⚡",
       "zoneId": "p2",
       "loc": "P2·E2",
-      "destPos": { "x": 132, "y": 200 }
+      "destPos": { "x": 177, "y": 200 }
     },
     {
       "id": 7,
@@ -144,7 +144,7 @@
       "emoji": "🔌",
       "zoneId": "p2",
       "loc": "P2·E4",
-      "destPos": { "x": 132, "y": 300 }
+      "destPos": { "x": 177, "y": 300 }
     },
     {
       "id": 8,
@@ -154,7 +154,7 @@
       "emoji": "💡",
       "zoneId": "p2",
       "loc": "P2·E1",
-      "destPos": { "x": 132, "y": 150 }
+      "destPos": { "x": 177, "y": 150 }
     },
     {
       "id": 9,
@@ -164,7 +164,7 @@
       "emoji": "🔧",
       "zoneId": "p3",
       "loc": "P3·C2",
-      "destPos": { "x": 222, "y": 200 }
+      "destPos": { "x": 267, "y": 200 }
     },
     {
       "id": 10,
@@ -174,7 +174,7 @@
       "emoji": "🔨",
       "zoneId": "p3",
       "loc": "P3·C3",
-      "destPos": { "x": 222, "y": 260 }
+      "destPos": { "x": 267, "y": 260 }
     },
     {
       "id": 11,
@@ -184,7 +184,7 @@
       "emoji": "🔩",
       "zoneId": "p5",
       "loc": "P5·D1",
-      "destPos": { "x": 402, "y": 170 }
+      "destPos": { "x": 447, "y": 170 }
     },
     {
       "id": 12,
@@ -194,7 +194,48 @@
       "emoji": "⚓",
       "zoneId": "p5",
       "loc": "P5·D2",
-      "destPos": { "x": 402, "y": 240 }
+      "destPos": { "x": 447, "y": 240 }
     }
+  ],
+  "pathNodes": [
+    { "id": "t0", "pos": { "x": 5, "y": 20 } },
+    { "id": "t1", "pos": { "x": 87, "y": 20 } },
+    { "id": "t2", "pos": { "x": 177, "y": 20 } },
+    { "id": "t3", "pos": { "x": 267, "y": 20 } },
+    { "id": "t4", "pos": { "x": 357, "y": 20 } },
+    { "id": "t5", "pos": { "x": 447, "y": 20 } },
+    { "id": "t6", "pos": { "x": 590, "y": 20 } },
+    { "id": "b0", "pos": { "x": 5, "y": 420 } },
+    { "id": "b1", "pos": { "x": 87, "y": 420 } },
+    { "id": "b2", "pos": { "x": 177, "y": 420 } },
+    { "id": "b3", "pos": { "x": 267, "y": 420 } },
+    { "id": "be", "pos": { "x": 300, "y": 420 } },
+    { "id": "b4", "pos": { "x": 357, "y": 420 } },
+    { "id": "b5", "pos": { "x": 447, "y": 420 } },
+    { "id": "b6", "pos": { "x": 590, "y": 420 } },
+    { "id": "ent", "pos": { "x": 300, "y": 500 } }
+  ],
+  "pathEdges": [
+    ["t0", "t1"],
+    ["t1", "t2"],
+    ["t2", "t3"],
+    ["t3", "t4"],
+    ["t4", "t5"],
+    ["t5", "t6"],
+    ["b0", "b1"],
+    ["b1", "b2"],
+    ["b2", "b3"],
+    ["b3", "be"],
+    ["be", "b4"],
+    ["b4", "b5"],
+    ["b5", "b6"],
+    ["t0", "b0"],
+    ["t1", "b1"],
+    ["t2", "b2"],
+    ["t3", "b3"],
+    ["t4", "b4"],
+    ["t5", "b5"],
+    ["t6", "b6"],
+    ["be", "ent"]
   ]
 }

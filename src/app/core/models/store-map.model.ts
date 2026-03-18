@@ -8,9 +8,16 @@ export interface QrPoint {
   zoneId: string;
 }
 
+export interface PathNode {
+  id: string;
+  pos: Position;
+}
+
 export interface StoreMapData {
   aisles: MapAisle[];
   zones: Zone[];
   qrPoints: QrPoint[];
   products: Product[];
+  pathNodes: PathNode[];
+  pathEdges: [string, string][];
 }

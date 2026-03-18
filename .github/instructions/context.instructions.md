@@ -46,10 +46,6 @@ Se eligió QR porque: cero hardware, funciona en cualquier celular, sin instalac
 
 ## Arquitectura del sistema
 
-### Frontend (lo que existe hoy)
-
-Archivo único `ferreteria-nav.html` — HTML/CSS/JS vanilla, sin dependencias externas.
-
 **3 pantallas:**
 
 - `#s-scan` — Selección de zona / simulación de escaneo QR
@@ -83,12 +79,12 @@ currentZone; // zona actual del usuario
 
 ```javascript
 const AISLES = [
-  { x: 20, y: 30, w: 80, h: 400, name: "Pintura", code: "P1" },
-  { x: 110, y: 30, w: 80, h: 400, name: "Eléctrico", code: "P2" },
-  { x: 200, y: 30, w: 80, h: 400, name: "Herramientas", code: "P3" },
-  { x: 290, y: 30, w: 80, h: 400, name: "Plomería", code: "P4" },
-  { x: 380, y: 30, w: 80, h: 400, name: "Fijaciones", code: "P5" },
-  { x: 470, y: 30, w: 110, h: 400, name: "Ofertas", code: "OF" },
+  { x: 20, y: 30, w: 80, h: 400, name: 'Pintura', code: 'P1' },
+  { x: 110, y: 30, w: 80, h: 400, name: 'Eléctrico', code: 'P2' },
+  { x: 200, y: 30, w: 80, h: 400, name: 'Herramientas', code: 'P3' },
+  { x: 290, y: 30, w: 80, h: 400, name: 'Plomería', code: 'P4' },
+  { x: 380, y: 30, w: 80, h: 400, name: 'Fijaciones', code: 'P5' },
+  { x: 470, y: 30, w: 110, h: 400, name: 'Ofertas', code: 'OF' },
 ];
 // Coordenadas lógicas 600×560. logToCanvas() escala al canvas real.
 ```

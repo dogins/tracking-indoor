@@ -1,11 +1,16 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, take } from 'rxjs';
+import { BehaviorSubject, combineLatest, take } from 'rxjs';
 import { Position } from '../models/position.model';
 import { Product } from '../models/product.model';
 import { QrPoint } from '../models/store-map.model';
 import { Zone } from '../models/zone.model';
 import { RouteService } from './route';
 import { StoreMapService } from './store-map';
+
+interface PathSegment {
+  from: Position;
+  to: Position;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -28,6 +33,17 @@ export class NavigationService {
   private readonly logicalUnitsPerMeter = 20;
   private readonly qrCalibRadiusLogical = 30;
   private activeQrInRange: string | null = null;
+  private pathSegments: PathSegment[] = [];
+
+  private readonly pathSub = combineLatest([
+    this.storeMapService.pathNodes$,
+    this.storeMapService.pathEdges$,
+  ]).subscribe(([nodes, edges]) => {
+    const nodeMap = new Map(nodes.map((n) => [n.id, n.pos]));
+    this.pathSegments = edges
+      .map(([a, b]) => ({ from: nodeMap.get(a)!, to: nodeMap.get(b)! }))
+      .filter((seg) => seg.from && seg.to);
+  });
 
   setZone(zoneId: string): void {
     this.storeMapService.zones$.pipe(take(1)).subscribe((zones) => {
@@ -37,8 +53,9 @@ export class NavigationService {
       }
 
       this.currentZone$.next(selectedZone);
-      this.pos$.next(selectedZone.anchorPos);
-      this.trail$.next([selectedZone.anchorPos]);
+      const snapped = this.snapToPath(selectedZone.anchorPos);
+      this.pos$.next(snapped);
+      this.trail$.next([snapped]);
       this.driftError$.next(0);
       this.routeWaypoints$.next([]);
       this.activeQrInRange = selectedZone.id;
@@ -57,10 +74,12 @@ export class NavigationService {
     const logicalStep = this.strideMeters * this.logicalUnitsPerMeter;
     const current = this.pos$.value;
 
-    const next: Position = {
+    const raw: Position = {
       x: current.x + Math.sin(radians) * logicalStep,
       y: current.y - Math.cos(radians) * logicalStep,
     };
+
+    const next = this.snapToPath(raw);
 
     this.pos$.next(next);
     this.steps$.next(this.steps$.value + 1);
@@ -75,15 +94,17 @@ export class NavigationService {
   }
 
   setPosition(position: Position): void {
-    this.pos$.next(position);
-    this.pushTrail(position);
-    this.autoCalibrateWithQr(position);
+    const snapped = this.snapToPath(position);
+    this.pos$.next(snapped);
+    this.pushTrail(snapped);
+    this.autoCalibrateWithQr(snapped);
   }
 
   calibrate(qrPos: Position): void {
-    this.pos$.next(qrPos);
+    const snapped = this.snapToPath(qrPos);
+    this.pos$.next(snapped);
     this.driftError$.next(0);
-    this.pushTrail(qrPos);
+    this.pushTrail(snapped);
   }
 
   reset(): void {
@@ -96,6 +117,34 @@ export class NavigationService {
     this.trail$.next([]);
     this.routeWaypoints$.next([]);
     this.activeQrInRange = null;
+  }
+
+  private snapToPath(raw: Position): Position {
+    if (this.pathSegments.length === 0) return raw;
+
+    let best = raw;
+    let bestDist = Infinity;
+
+    for (const seg of this.pathSegments) {
+      const p = this.closestPointOnSegment(raw, seg.from, seg.to);
+      const d = this.distance(raw, p);
+      if (d < bestDist) {
+        bestDist = d;
+        best = p;
+      }
+    }
+
+    return best;
+  }
+
+  private closestPointOnSegment(p: Position, a: Position, b: Position): Position {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return a;
+
+    const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq));
+    return { x: a.x + t * dx, y: a.y + t * dy };
   }
 
   private autoCalibrateWithQr(position: Position): void {

@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { map, Observable, shareReplay } from 'rxjs';
 import { MapAisle } from '../models/map-aisle.model';
 import { Product } from '../models/product.model';
-import { QrPoint, StoreMapData } from '../models/store-map.model';
+import { PathNode, QrPoint, StoreMapData } from '../models/store-map.model';
 import { Zone } from '../models/zone.model';
 
 @Injectable({
@@ -20,6 +20,8 @@ export class StoreMapService {
   readonly zones$: Observable<Zone[]> = this.data$.pipe(map((data) => data.zones));
   readonly products$: Observable<Product[]> = this.data$.pipe(map((data) => data.products));
   readonly qrPoints$: Observable<QrPoint[]> = this.data$.pipe(map((data) => data.qrPoints));
+  readonly pathNodes$: Observable<PathNode[]> = this.data$.pipe(map((data) => data.pathNodes));
+  readonly pathEdges$: Observable<[string, string][]> = this.data$.pipe(map((data) => data.pathEdges));
 
   getProductsByZone(zoneId: string): Observable<Product[]> {
     return this.products$.pipe(map((products) => products.filter((product) => product.zoneId === zoneId)));
